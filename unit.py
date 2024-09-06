@@ -61,7 +61,6 @@ class Unit(pygame.sprite.Sprite):
         return self.rect.colliderect(other.rect)
 
     def handle_collision(self, other):
-        # Разделяем объекты, чтобы избежать слипания
         overlap_x = min(self.rect.right, other.rect.right) - max(self.rect.left, other.rect.left)
         overlap_y = min(self.rect.bottom, other.rect.bottom) - max(self.rect.top, other.rect.top)
 
@@ -76,21 +75,16 @@ class Unit(pygame.sprite.Sprite):
             else:
                 self.pos.y += overlap_y
 
-        # Обновляем rect после разделения
         self.rect.topleft = self.pos
-        # Обработка столкновения с учетом массы и скорости
         m1, m2 = self.mass, other.mass
         v1, v2 = self.vector, other.vector
 
-        # Расчет новых скоростей после столкновения
         new_v1 = v1 - (2 * m2 / (m1 + m2)) * ((v1 - v2).dot(self.pos - other.pos) / (self.pos - other.pos).length_squared()) * (self.pos - other.pos)
         new_v2 = v2 - (2 * m1 / (m1 + m2)) * ((v2 - v1).dot(other.pos - self.pos) / (other.pos - self.pos).length_squared()) * (other.pos - self.pos)
 
-        # Применяем коэффициент демпфирования
         new_v1 *= 0.8
         new_v2 *= 0.8
 
-        # Проверяем, чтобы скорости не были слишком маленькими для отскока
         if new_v1.length() > MIN_BOUNCE_VELOCITY:
             self.vector = new_v1
         if new_v2.length() > MIN_BOUNCE_VELOCITY:
